@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /**
  * constants used for the dimensions of the sudoku
@@ -11,7 +12,7 @@
  * the default grid used as input for the program to solve
  * 0 represent empty
  */
-int grid[SIZE][SIZE] = { 
+unsigned char grid[SIZE][SIZE] = { 
         { 3, 0, 6, 5, 0, 8, 4, 0, 0 },
         { 5, 2, 0, 0, 0, 0, 0, 0, 0 },
         { 0, 8, 7, 0, 0, 0, 0, 3, 1 },
@@ -26,7 +27,7 @@ int grid[SIZE][SIZE] = {
 /**
  * Prints the grid with squares being seperated by lines
  */
-void printGrid(int grid[SIZE][SIZE]) {
+void printGrid(unsigned char grid[SIZE][SIZE]) {
     char i = 0, j = 0;
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
@@ -46,43 +47,46 @@ void printGrid(int grid[SIZE][SIZE]) {
     }
 }
 
-// Checks if it is legal to assign a number to the given row, column
-int isLegal(int grid[SIZE][SIZE], int row, int col, int num) {
-    int i;
-
-    // Check if number is present within the row; if it does, return 0
-    for (i = 0; i < SIZE; i++) {
+/**
+ * unsigned char grid [SIZE][SIZE] -- the 2D array representing the grid of the sudoku
+ * unsigned char row -- the index of the row the num is trying to be added to
+ * unsigned char col -- the index of the col the num is trying to be added to
+ * unsigned char num -- the number trying to be added to the grid at indexes row and col
+ * return is bool true iff it is legal by sudoku standards to add the num in the grid at row, col (Note any position that has 0 does not violate the legality of the position) else false
+ */
+bool isLegal(unsigned char grid[SIZE][SIZE], unsigned char row, unsigned char col, unsigned char num) {
+    for (unsigned char i = 0; i < SIZE; i++) {
         if (grid[row][i] == num) {
-            return 0;
+            // oy the num just appeared in this row -- we can't have that
+            return false;
         }
     }
 
-    // Check if number is present within the column; if it is, return 0
-    for (i = 0; i < SIZE; i++) {
+    for (unsigned char i = 0; i < SIZE; i++) {
         if (grid[i][col] == num) {
-            return 0;
+            // oy the num just appeared in this col -- we can't have that
+            return false;
         }
     }
 
     // Check if number is present within the smaller 3x3 squares; if it is, return 0
-    int startRow = row - row % (SIZE / 3); 
-    int startCol = col - col % (SIZE / 3);
+    unsigned char startRow = row - row % (SQR_SIZE); 
+    unsigned char startCol = col - col % (SQR_SIZE);
 
-    for (int i = 0; i < (SIZE / 3); i++) {
-        for (int j = 0; j < (SIZE / 3); j++) {
+    for (unsigned char i = 0; i < SQR_SIZE; i++) {
+        for (unsigned char j = 0; j < SQR_SIZE; j++) {
             if (grid[i + startRow][j + startCol] == num) {
-                return 0;
+                return false;
             }
         }
     }
 
-
-    // If the number isn't present within the row, column, or square, it is legal: return 1
-    return 1; 
+    // ok so the num was fine to be in the row, the col, and the square -- we're good with that
+    return true; 
 }
 
-int fillSudoku(int grid[SIZE][SIZE], int row, int col) {
-    int i;
+unsigned char fillSudoku(unsigned char grid[SIZE][SIZE], unsigned char row, unsigned char col) {
+    unsigned char i;
 
     // Checks if we reached 8th row and 9th col
     // Return 1 to avoid further backtracking
@@ -102,7 +106,7 @@ int fillSudoku(int grid[SIZE][SIZE], int row, int col) {
         return fillSudoku(grid, row, col + 1);
     }
 
-    for (int num = 1; num <= SIZE; num++) {
+    for (unsigned char num = 1; num <= SIZE; num++) {
 
         if (isLegal(grid, row, col, num)) {
             grid[row][col] = num;
@@ -138,4 +142,6 @@ int main() {
 
     printf("\n\n");
     printf("Thanks for staying with us. It was a pleasure to have you. God bless & Leben Sie Wohl!\n");
+
+    return 0;
 }
